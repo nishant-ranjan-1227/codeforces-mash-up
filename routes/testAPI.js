@@ -3,7 +3,7 @@ var router = express.Router();
 const fetch = require("node-fetch");
 
 router.get("/", async function (req, res) {
-  let tags = ["math", "dp"];
+  let tags = [];
   let url = "https://codeforces.com/api/problemset.problems";
 
   if (tags.length !== 0) {
@@ -20,8 +20,8 @@ router.get("/", async function (req, res) {
   let allProblemsWithTagInJson = await allProblemsWithTag.json();
 
   let userId = "bittuBhaiya"; //get from the request
-  let maxRating = 1800; //get from request
-  let minRating = 1500; //get from request
+  let maxRating = 1500; //get from request
+  let minRating = 1300; //get from request
   let problemCount = 10;
 
   // submissions of User
@@ -33,15 +33,15 @@ router.get("/", async function (req, res) {
   let submissions = await fetch(urlToGetAllSubmissions);
   let submissionsResponse = await submissions.json();
 
-  let allCorrectSubmissions = [];
+  let allCorrectSubmissions = new Set();
   submissionsResponse.result.forEach((item) => {
     if (item.verdict === "OK") {
-      allCorrectSubmissions.push({
-        contestId: item.problem.contestId,
-        index: item.problem.index,
-      });
+      let problemID = item.problem.contestId + item.problem.index;
+      allCorrectSubmissions.add(problemID);
     }
   });
+
+  console.log(allCorrectSubmissions);
 
   let problemsWithGivenTagsAndRating = []; //with contain an object { constestId : Number, Index : string}
   allProblemsWithTagInJson.result.problems.forEach((problem) => {
@@ -59,7 +59,37 @@ router.get("/", async function (req, res) {
     }
   });
 
-  res.send(problemsWithGivenTagsAndRating);
+  // get the req number of unique unsolved problems
+  // iterate over the total problems length and find a random number till the curProblemCount not equal to reProblemsCount
+
+  let totalProblems = problemsWithGivenTagsAndRating.length;
+  let alreadyGeneratedRandomNumbers = [];
+  let finalListOfProblems = [];
+  let curProblemCount = 0;
+  let reqProblemsCount = 900; //get from request
+
+  console.log("Total Problems", totalProblems);
+
+  while (
+    curProblemCount != reqProblemsCount &&
+    alreadyGeneratedRandomNumbers.length < totalProblems
+  ) {
+    const random = Math.floor(Math.random() * totalProblems);
+    if (alreadyGeneratedRandomNumbers.includes(random) === false) {
+      alreadyGeneratedRandomNumbers.push(random);
+      let currentProblemID =
+        problemsWithGivenTagsAndRating[random].contestId +
+        problemsWithGivenTagsAndRating[random].index;
+      if (allCorrectSubmissions.has(currentProblemID) == false) {
+        console.log("cur", currentProblemID);
+        curProblemCount += 1;
+      } else {
+        console.log("Problem Already Solved");
+      }
+    }
+  }
+
+  res.send(allCorrectSubmissions);
 });
 
 module.exports = router;
