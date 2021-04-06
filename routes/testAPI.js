@@ -41,7 +41,7 @@ router.get("/", async function (req, res) {
     }
   });
 
-  console.log(allCorrectSubmissions);
+  //console.log(allCorrectSubmissions);
 
   let problemsWithGivenTagsAndRating = []; //with contain an object { constestId : Number, Index : string}
   allProblemsWithTagInJson.result.problems.forEach((problem) => {
@@ -54,6 +54,7 @@ router.get("/", async function (req, res) {
           index: problem.index,
           rating: problem.rating,
           tags: problem.tags,
+          name: problem.name,
         });
       }
     }
@@ -66,9 +67,9 @@ router.get("/", async function (req, res) {
   let alreadyGeneratedRandomNumbers = [];
   let finalListOfProblems = [];
   let curProblemCount = 0;
-  let reqProblemsCount = 900; //get from request
+  let reqProblemsCount = 10; //get from request
 
-  console.log("Total Problems", totalProblems);
+  //console.log("Total Problems", totalProblems);
 
   while (
     curProblemCount != reqProblemsCount &&
@@ -77,19 +78,36 @@ router.get("/", async function (req, res) {
     const random = Math.floor(Math.random() * totalProblems);
     if (alreadyGeneratedRandomNumbers.includes(random) === false) {
       alreadyGeneratedRandomNumbers.push(random);
+      // Created a problem ID to check if already solved : "1234A"
       let currentProblemID =
         problemsWithGivenTagsAndRating[random].contestId +
         problemsWithGivenTagsAndRating[random].index;
       if (allCorrectSubmissions.has(currentProblemID) == false) {
-        console.log("cur", currentProblemID);
+        //console.log("cur", currentProblemID);
+        let finalProblem = {
+          contestId: problemsWithGivenTagsAndRating[random].contestId,
+          index: problemsWithGivenTagsAndRating[random].index,
+          name: problemsWithGivenTagsAndRating[random].name,
+          tags: problemsWithGivenTagsAndRating[random].tags,
+          rating: problemsWithGivenTagsAndRating[random].rating,
+          link:
+            "https://codeforces.com/problemset/problem/" +
+            problemsWithGivenTagsAndRating[random].contestId +
+            "/" +
+            problemsWithGivenTagsAndRating[random].index,
+        };
+
+        finalListOfProblems.push(finalProblem);
         curProblemCount += 1;
       } else {
-        console.log("Problem Already Solved");
+        // console.log("Problem Already Solved");
       }
     }
   }
 
-  res.send(allCorrectSubmissions);
+  console.log(finalListOfProblems);
+
+  res.send(finalListOfProblems);
 });
 
 module.exports = router;
