@@ -2,7 +2,7 @@ var express = require("express");
 var router = express.Router();
 const fetch = require("node-fetch");
 
-router.get("/", async function (req, res) {
+router.post("/", async function (req, res) {
   let tags = [];
   let url = "https://codeforces.com/api/problemset.problems";
 
@@ -107,7 +107,11 @@ router.get("/", async function (req, res) {
 
   console.log(finalListOfProblems);
 
-  res.send(finalListOfProblems);
+  let finalresult = {
+    result: finalListOfProblems,
+  };
+
+  res.json(finalresult);
 });
 
 module.exports = router;
