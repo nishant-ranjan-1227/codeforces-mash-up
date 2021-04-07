@@ -3,6 +3,7 @@ var router = express.Router();
 const fetch = require("node-fetch");
 
 router.post("/", async function (req, res) {
+  console.log(req.body);
   let tags = [];
   let url = "https://codeforces.com/api/problemset.problems";
 
@@ -19,10 +20,9 @@ router.post("/", async function (req, res) {
   let allProblemsWithTag = await fetch(url);
   let allProblemsWithTagInJson = await allProblemsWithTag.json();
 
-  let userId = "bittuBhaiya"; //get from the request
-  let maxRating = 1500; //get from request
-  let minRating = 1300; //get from request
-  let problemCount = 10;
+  let userId = req.body.userID; //get from the request
+  let maxRating = req.body.maxR; //get from request
+  let minRating = req.body.minR; //get from request
 
   // submissions of User
   let urlToGetAllSubmissions =
@@ -67,7 +67,7 @@ router.post("/", async function (req, res) {
   let alreadyGeneratedRandomNumbers = [];
   let finalListOfProblems = [];
   let curProblemCount = 0;
-  let reqProblemsCount = 10; //get from request
+  let reqProblemsCount = req.body.num; //get from request
 
   //console.log("Total Problems", totalProblems);
 
@@ -104,8 +104,6 @@ router.post("/", async function (req, res) {
       }
     }
   }
-
-  console.log(finalListOfProblems);
 
   let finalresult = {
     result: finalListOfProblems,
